@@ -45,6 +45,8 @@ static struct item *matches, *matchend;
 static struct item *prev, *curr, *next, *sel;
 static int mon = -1, screen;
 
+static struct item noneitem;
+
 static Atom clip, utf8;
 static Display *dpy;
 static Window root, parentwin, win;
@@ -229,6 +231,8 @@ match(void)
 	len = tokc ? strlen(tokv[0]) : 0;
 
 	matches = lprefix = lsubstr = matchend = prefixend = substrend = NULL;
+	noneitem.text = text;
+	appenditem(&noneitem, &matches, &matchend);
 	textsize = strlen(text) + 1;
 	for (item = items; item && item->text; item++) {
 		for (i = 0; i < tokc; i++)
@@ -260,7 +264,10 @@ match(void)
 			matches = lsubstr;
 		matchend = substrend;
 	}
-	curr = sel = matches;
+	/* first item is the option to just take what you typed which should not
+	 * be selected by default */
+	curr = matches;
+	sel = matches->right ? matches->right : matches;
 	calcoffsets();
 }
 
